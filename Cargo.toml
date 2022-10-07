@@ -1,0 +1,13 @@
+[package]
+name = "box-self"
+version = "0.1.0"
+edition = "2021"
+description = "Easy way to duplicate a new function with self: Box<Self> signature"
+
+[dependencies]
+syn = {version="1.0.57",features=["full","fold"]}
+quote = "1.0.8"
+
+[lib]
+path = "src/lib.rs"
+proc-macro = true
