@@ -28,11 +28,10 @@
 //!    } 
 //!
 //!    fn main(){
-//!        let mut animals:Vec<Box<dyn Animal>>=Vec::new();
-//!        animals.push(Box::new(Dog{}));
-//!        animals.push(Box::new(Cat{}));
+//!        let animals:Vec<Box<dyn Animal>>=vec![Box::new(Dog{}), Box::new(Cat{})];
+//!        
 //!        for anim in animals{
-//!            anim.consume_boxed()
+//!            anim.consume_boxed();
 //!        }
 //!    }
 //! ```
