@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/hoyunliu/box-self/"
 description = "Easy way to duplicate a new function with self: Box<Self> signature"
-
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 syn = {version="1.0.57",features=["full","fold"]}

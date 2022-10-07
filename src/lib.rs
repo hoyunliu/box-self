@@ -50,7 +50,7 @@
 //! [`How to pass a boxed trait object by value in Rust?`]: https://stackoverflow.com/questions/65261399/how-to-pass-a-boxed-trait-object-by-value-in-rust
 //! <br>
 //! 
-//! #### License
+//! ### License
 //! Licensed under either of [LICENSE-APACHE](LICENSE-APACHE) or [LICENSE-MIT](LICENSE-MIT)  at your option.
 //! 
 //! <br>
