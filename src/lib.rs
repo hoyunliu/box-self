@@ -49,6 +49,17 @@
 //! 
 //! [`How to pass a boxed trait object by value in Rust?`]: https://stackoverflow.com/questions/65261399/how-to-pass-a-boxed-trait-object-by-value-in-rust
 //! <br>
+//! 
+//! #### License
+//! Licensed under either of [LICENSE-APACHE](LICENSE-APACHE) or [LICENSE-MIT](LICENSE-MIT)  at your option.
+//! 
+//! <br>
+//! 
+//! Unless you explicitly state otherwise, any contribution intentionally submitted
+//! for inclusion in this crate by you, as defined in the Apache-2.0 license, shall
+//! be dual licensed as above, without any additional terms or conditions.
+
+
 
 use proc_macro::{TokenStream, TokenTree,  Ident};
 use quote::{quote,ToTokens};
