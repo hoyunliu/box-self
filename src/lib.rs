@@ -28,7 +28,8 @@
 //!    } 
 //!
 //!    fn main(){
-//!        let animals:Vec<Box<dyn Animal>>=vec![Box::new(Dog{}), Box::new(Cat{})];
+//!        let animals:Vec<Box<dyn Animal>>=
+//!             vec![Box::new(Dog{}), Box::new(Cat{})];
 //!        
 //!        for anim in animals{
 //!            anim.consume_boxed();

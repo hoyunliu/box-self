@@ -30,7 +30,8 @@ Sometimes you need both functions `fn consume(self)` and `fn consume_boxed(self:
    }
 
    fn main(){
-       let animals:Vec<Box<dyn Animal>>=vec![Box::new(Dog{}), Box::new(Cat{})];
+       let animals:Vec<Box<dyn Animal>>=
+            vec![Box::new(Dog{}), Box::new(Cat{})];
 
        for anim in animals{
            anim.consume_boxed();

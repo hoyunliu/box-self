@@ -1,6 +1,6 @@
 [package]
 name = "box-self"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 repository = "https://github.com/hoyunliu/box-self/"
 description = "Easy way to duplicate a new function with self: Box<Self> signature"
