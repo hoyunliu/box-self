@@ -44,11 +44,6 @@
 //! [`How to call a method that consumes self on a boxed trait object?`]: https://stackoverflow.com/questions/46620790/how-to-call-a-method-that-consumes-self-on-a-boxed-trait-object
 //! <br>
 //! 
-//! ### Another solution on nightly Rust `unsized_fn_params`:
-//! - [`How to pass a boxed trait object by value in Rust?`]
-//! 
-//! [`How to pass a boxed trait object by value in Rust?`]: https://stackoverflow.com/questions/65261399/how-to-pass-a-boxed-trait-object-by-value-in-rust
-//! <br>
 //! 
 //! ### License
 //! Licensed under either of [LICENSE-APACHE](LICENSE-APACHE) or [LICENSE-MIT](LICENSE-MIT)  at your option.
