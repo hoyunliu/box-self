@@ -124,20 +124,28 @@ fn extract_params_without_type(params:TokenStream2) -> TokenStream2 {
     let mut last_ident:Option::<proc_macro2::Ident>=None;
 
     // only take idents before ':' 
+    let mut ident_not_found=true;
     while let Some(tt) =it.next(){
+        //println!("tt={tt:?}");
         match tt {
             proc_macro2::TokenTree::Ident(i) =>{
                 last_ident=Some(i.clone());
+                
             },
-            proc_macro2::TokenTree::Punct(p) if p.as_char()==':' =>{
+            proc_macro2::TokenTree::Punct(p) if p.as_char()==':' && ident_not_found  =>{
                 if let Some(i)=&last_ident{
                     if i.to_string()!="self"{ // ignore 'self'
+                       //println!("pushing ident={}",i.to_string());
+                        ident_not_found=false;
                         params_without_type.push(proc_macro2::TokenTree::Ident(last_ident.take().unwrap()));
                         let p=proc_macro2::Punct::new(',',proc_macro2::Spacing::Alone);
                         params_without_type.push(proc_macro2::TokenTree::Punct(p));
                     }
                 }
             },
+            proc_macro2::TokenTree::Punct(p) if p.as_char()==',' =>{
+                ident_not_found=true; // reset for next ident
+            }
             _=>{}
         }
     }
