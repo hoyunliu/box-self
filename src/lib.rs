@@ -56,20 +56,54 @@
 
 
 
-use proc_macro::{TokenStream, TokenTree,  Ident};
+use proc_macro::{TokenStream};
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote,ToTokens};
 use syn::{parse_macro_input, ItemFn};
 
-#[doc(hidden)]
-#[proc_macro]
-pub fn replace_params(input: TokenStream) -> TokenStream {
+
+
+
+#[proc_macro_attribute]
+pub fn box_self(attr_postfix: TokenStream, item: TokenStream) -> TokenStream {
+    let orig_func = parse_macro_input!(item as ItemFn);
+
+    let func_vis = &orig_func.vis; 
+    let func_sig = orig_func.sig.clone();
+    let func_generics = &func_sig.generics;
+    let func_output = &func_sig.output;
+
+    // original function signature
+    let orgi_fn_name=&func_sig.ident;
+    let s_fn_name=orgi_fn_name.to_string()+attr_postfix.to_string().as_str();
+    let func_params = func_sig.inputs.clone();
+
+    // convert to new function signature
+    let new_func_name: proc_macro2::Ident = proc_macro2::Ident::new(s_fn_name.as_str(),proc_macro2::Span::call_site()); // function name
+    let delcaring_params=replace_params_declaration(func_params.to_token_stream().into());
+    let calling_params=extract_params_without_type(func_params.into_token_stream());
+    
+    // generate the new function body,  using  `  (*self).consume(calling_params)  `
+    let new_func:TokenStream = quote!{
+        #[inline] #func_vis fn #new_func_name #func_generics(#delcaring_params) #func_output {
+            (*self).#orgi_fn_name(#calling_params)
+        }
+    }.into();
+ 
+    TokenStream::from_iter( [orig_func.to_token_stream().into() ,new_func])
+}
+
+
+//replace 'self' with 'self:Box<Self>'  in the parameters declaration
+fn replace_params_declaration(input: TokenStream2) -> TokenStream2 {
+    use proc_macro2::TokenTree;
     let mut old_params=input.into_iter();
     let mut new_params=Vec::new();
     while let Some(tt) =old_params.next(){
         match tt {
-            TokenTree::Ident(i) if i.to_string()=="self" =>{   
+            proc_macro2::TokenTree::Ident(i) if i.to_string()=="self" =>{   
                 new_params.push(TokenTree::Ident(i));
-                let extra_boxed:TokenStream=quote!{:Box<Self>}.into();      //add ':Box<Self>'
+                let extra_boxed:TokenStream2=quote!{:Box<Self>}.into();      //add ':Box<Self>'
                 for extra_boxed_param in extra_boxed.into_iter(){
                     new_params.push(extra_boxed_param);
                 }
@@ -83,37 +117,29 @@ pub fn replace_params(input: TokenStream) -> TokenStream {
     new_params.into_iter().collect()
 }
 
-/// Duplicate `consume self` function with boxed signature and postfix
-#[proc_macro_attribute]
-pub fn box_self(attr_postfix: TokenStream, item: TokenStream) -> TokenStream {
-    // get the function this attribute is attached to
-    let orig_func = parse_macro_input!(item as ItemFn);
-    let orig_func_stream:TokenStream=orig_func.to_token_stream().into();
+// extract parameters for calling the original function
+fn extract_params_without_type(params:TokenStream2) -> TokenStream2 {
+    let mut params_without_type=Vec::new();
+    let mut it=params.into_iter();
+    let mut last_ident:Option::<proc_macro2::Ident>=None;
 
-    let mut next_group_is_params=false;
-    let mut next_iden_is_fn_name=false;
-    let it=orig_func_stream.into_iter();
-    let boxed_self_func:TokenStream=it.map(|tt| {
+    // only take idents before ':' 
+    while let Some(tt) =it.next(){
         match tt {
-            TokenTree::Ident(ref i) if i.to_string()=="fn"=>{
-                next_iden_is_fn_name=true;
-                TokenTree::Ident(i.clone())
+            proc_macro2::TokenTree::Ident(i) =>{
+                last_ident=Some(i.clone());
             },
-            TokenTree::Ident(ref i) if next_iden_is_fn_name => {
-                next_iden_is_fn_name=false;
-                next_group_is_params=true;
-                TokenTree::Ident(Ident::new((i.to_string()+attr_postfix.to_string().as_str()).as_str(), i.span()))
+            proc_macro2::TokenTree::Punct(p) if p.as_char()==':' =>{
+                if let Some(i)=&last_ident{
+                    if i.to_string()!="self"{ // ignore 'self'
+                        params_without_type.push(proc_macro2::TokenTree::Ident(last_ident.take().unwrap()));
+                        let p=proc_macro2::Punct::new(',',proc_macro2::Spacing::Alone);
+                        params_without_type.push(proc_macro2::TokenTree::Punct(p));
+                    }
+                }
             },
-            TokenTree::Group(params) if next_group_is_params =>{
-                next_group_is_params=false;
-                let new_stream=replace_params(params.stream());
-                let g2=proc_macro::Group::new(params.delimiter(),new_stream);
-                TokenTree::Group(g2)
-            },
-            // All other tokens are just forwarded
-            other => other,
+            _=>{}
         }
-    }).collect();
-
-    TokenStream::from_iter( [orig_func.to_token_stream().into() ,boxed_self_func])
-}   
+    }
+    params_without_type.into_iter().collect()
+}
